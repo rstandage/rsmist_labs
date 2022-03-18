@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-import json, websocket
+import json, websocket, 
+import os
+from dotenv import load_dotenv
 
-#Define Variables
+load_dotenv()
 
-api_token = ""
-org_id = ""
-site_id = ""
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
+site_id = os.getenv("SITE_ID")
 
 # Create URLs
 base_url = "wss://api-ws.mist.com/api-ws/v1/stream"

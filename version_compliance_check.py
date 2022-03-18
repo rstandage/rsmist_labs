@@ -7,13 +7,16 @@ THis script checks software version of a particular hardwqre type and validates 
 
 import json, requests
 import time
+import os
+from dotenv import load_dotenv
 
-########### Define Variables ###############################
-api_token = ""
-org_id = ""
-site_id = ""
+load_dotenv()
+
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
+site_id = os.getenv("SITE_ID")
+
 hw_type = "AP41"
-
 
     # Create URLs
 base_url = "https://api.mist.com/api/v1"

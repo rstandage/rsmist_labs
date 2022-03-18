@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 
-import json, requests, time
-import datetime as dt
-
 """
 Gets logs periodically based on timer variable and prints JSON to screen
 
 """
 
-########### Define Variables ###############################
-api_token = ""
-org_id = ""
+import json, requests, time
+import datetime as dt
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
 
     # Create URLs
 base_url = "https://api.mist.com/api/v1"

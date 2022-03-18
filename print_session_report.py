@@ -7,14 +7,14 @@ This script is used to track live user session, format useful data and print to 
 import json, requests
 import time
 import datetime as dt
-import csv
+import os
+from dotenv import load_dotenv
 
-########### Define Variables ###############################
+load_dotenv()
 
-
-api_token = ""
-org_id = ""
-site_id = ""
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
+site_id = os.getenv("SITE_ID")
 
     # Create URLs
 base_url = "https://api.mist.com/api/v1"

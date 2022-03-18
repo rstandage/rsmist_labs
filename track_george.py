@@ -3,18 +3,21 @@
 """
 Tracks a user's XY co-ordinates via a websocket
 Need to add map ID and asset
-THis URL is for SDK clients as its better for accuracy on the demo lab. CAn be changes to BLE/WiFi
+Tsis URL is for SDK clients as its better for accuracy on the demo lab. Can be changed to BLE/WiFi
 
 """
 
 import json, websocket
 import time
 from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
 
-#Define Variables
-api_token = ""
-org_id = ""
-site_id = ""
+load_dotenv()
+
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
+site_id = os.getenv("SITE_ID")
 
 #Follow Curious George in the Live Demo
 map_id = ""
@@ -104,11 +107,13 @@ def establish_ws():
  
 if __name__ == '__main__':
     # Ensure variables are defined
-    if api_token == '' or site_id == '' or sub == '':
+    if api_token == '' or site_id == '' or sub == '' or map_id == '' or AssetTagName == '':
         print('Check for Missing variables:')
         print('api_token={}'.format(api_token))
         print('site_id={}'.format(site_id))
         print('sub={}'.format(sub))
+        print('map_id={}'.format(map_id))
+        print('AssetTagName={}'.format(AssetTagName))
     else:    
         start_time = time.time()
         print('** GETTING LOCATION DATA FOR ASSET TAGS...\n')

@@ -8,10 +8,13 @@ Witten to pish to Slack but was initially for a POST to Splunk
 
 import json, requests, time
 import datetime as dt
+import os
+from dotenv import load_dotenv
 
-########### Define Variables ###############################
-api_token = ""
-org_id = ""
+load_dotenv()
+
+api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
 
     # Create URLs
 base_url = "https://api.mist.com/api/v1"
