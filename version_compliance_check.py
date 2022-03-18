@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
+'''
+THis script checks software version of a particular hardwqre type and validates it against the site config
+
+'''
+
 import json, requests
 import time
 
 ########### Define Variables ###############################
-api_token = "tE5fSPdGeoZ1TvoZwGdYqrFGfeIlonsy5SnpiAar6ROBFUcSTjJ1lP4yrKBrEfdaIFgHFdBuu4xJcfBXNGk8yd983aapOx1g"
-org_id = "392fe71c-5e38-4e85-afa2-7d7f1132f8cb"
-site_id = "ccbe23b4-724d-4c86-a524-d6f281ad654c"
+api_token = ""
+org_id = ""
+site_id = ""
 hw_type = "AP41"
 
 
