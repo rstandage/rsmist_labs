@@ -11,6 +11,8 @@ You will also need to create a file to store your specifc variables
 
 #creds.env template
 API_TOKEN="Add you API Token"
+
 ORD_ID="Add Your Org ID"
+
 SITE_ID="Add your Site ID"
 
