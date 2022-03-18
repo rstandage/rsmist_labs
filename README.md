@@ -1,5 +1,5 @@
 <h2 dir="auto">This is a collection of some basic scripts I have created for customer demonstrations on the use cases for the Mist API.</h2>
-<p dir="auto"><span style="text-decoration: underline;"><strong>NONE OF THESE SHOULD BE USED IN A PRODUCTION ENVIRONMENT</strong></span></p>
+<p dir="auto"><span style="text-decoration: underline; color: #ff0000;"><strong>NONE OF THESE SHOULD BE USED IN A PRODUCTION ENVIRONMENT</strong></span></p>
 <h3 dir="auto">You will need to install the following modules:</h3>
 <p dir="auto"><code>pip install websockets </code></p>
 <p dir="auto"><code>pip install python-dotenv</code></p>
