@@ -52,13 +52,15 @@ def get_client_details():
     resp2 = requests.get(site_clients_url, headers=headers )
     data2 = resp2.json()
     api_count = api_count+1
-
+    print(json.dumps(data2, indent=2))
     for client in data2:
-
         print ("Username: ", client['username'])
         print ("IP: ", client['ip'])
         print ("MAC: ", client['mac'])
-        print ("Map ID: ", client['map_id'])
+        map_id = str(client['map_id'])
+        if map_id in map_dict:
+            map_name = map_dict[map_id]
+        print ("Map ID: ", map_name)
         print ("Vendor: ", client['manufacture']) 
         print ("Connected: ", dt.datetime.fromtimestamp(client['assoc_time']))
         print ("Duration h/m/s:", dt.timedelta(seconds=(client['uptime'])))
@@ -66,6 +68,7 @@ def get_client_details():
         print ("Security", client['key_mgmt'])
         print ("***************************")
         print ()
+
 
 
 def main():
