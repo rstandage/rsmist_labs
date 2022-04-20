@@ -129,7 +129,10 @@ def format_data(x):
     else:
         radsec = "None"
     mxtunnel_id = x['mxtunnel_id']
-#    mxtunnel_name = convert_tunnel_ids(mxtunnel_id, tunneldict)
+    if mxtunnel_id = "":
+        mxtunnel_name = "none"
+    else:
+        mxtunnel_name = convert_tunnel_ids(mxtunnel_id, tunneldict)
     vlan_id = x['vlan_id']
     authtype = x['auth']['type']
     templateid = x['template_id']
@@ -148,7 +151,7 @@ def format_data(x):
     'Authentication Servers': authservers,
     'Accounting Servers': acctservers,
     'RadSec': radsec,
-#    'Edge Tunnel': mxtunnel_name,
+    'Edge Tunnel': mxtunnel_name,
     'Template Name': templatename,
     'Template Applies To': templateappliesto_name
     }

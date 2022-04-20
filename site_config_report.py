@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 '''
+
+
 This script gathers data on all sites for compliance verification adn creates a CSV file. You will need to add a full path for output_location
 
 '''
