@@ -19,7 +19,7 @@ import urllib3
 import os
 from dotenv import load_dotenv
 
-load_dotenv("/home/devadmin/mist_lab/hsbcwakefield.env")
+load_dotenv()
 
 ##turns off the warning that is generated below because Splunk is using a self signed ssl cert
 urllib3.disable_warnings()
