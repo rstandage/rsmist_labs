@@ -83,13 +83,12 @@ def get_sitegroups():
     for i in data0:
         sitegroupdict[i['id']] = i['name']    
 
-def convert_tunnel_ids(x, y):
-    for tid, tname in y.items():
-        if tid == x:
-            tunnelname = tname
-        else:
-            tunnelname = "none"
-    return tunnelname
+def convert_ids_str(x, y):
+    namestr = ""
+    for i, n in y.items():
+        if x == i:
+            namestr = n
+    return namestr
 
 def convert_template_ids(x, y):
     for temp in y:
@@ -97,13 +96,13 @@ def convert_template_ids(x, y):
             tempname = temp['name']
     return tempname
 
-def convert_sitegroup_ids(x, y):
-    groupnamelist = []
+def convert_ids_list(x, y):
+    namelist = []
     for i in x:
         for gid, gname in y.items():
             if i == gid:
-                groupnamelist.append(gname)
-    return groupnamelist
+                namelist.append(gname)
+    return namelist
 
 def create_applies_to(x, y):
     for temp in y:
@@ -129,19 +128,22 @@ def format_data(x):
     else:
         radsec = "None"
     mxtunnel_id = x['mxtunnel_id']
-    if mxtunnel_id = "":
+    if mxtunnel_id == "null":
         mxtunnel_name = "none"
     else:
-        mxtunnel_name = convert_tunnel_ids(mxtunnel_id, tunneldict)
+        mxtunnel_name = convert_ids_str(mxtunnel_id, tunneldict)
     vlan_id = x['vlan_id']
     authtype = x['auth']['type']
     templateid = x['template_id']
     templatename = convert_template_ids(templateid, Template_Array)
     templateappliesto_id = create_applies_to(templateid, Template_Array)
-    templateappliesto_name = convert_sitegroup_ids(templateappliesto_id, sitegroupdict)
+    templateappliesto_name = convert_ids_list(templateappliesto_id, sitegroupdict)
 
     #Set columns for each site
     values = {
+    'Template Name': templatename,
+    'Template ID' : templateid,
+    'Associated Groups': templateappliesto_name,
     'SSID': ssid,
     'ID': id,
     'Enabled': enabled,
@@ -151,15 +153,13 @@ def format_data(x):
     'Authentication Servers': authservers,
     'Accounting Servers': acctservers,
     'RadSec': radsec,
-    'Edge Tunnel': mxtunnel_name,
-    'Template Name': templatename,
-    'Template Applies To': templateappliesto_name
+    'Edge Tunnel': mxtunnel_name    
     }
     return values    
 
 
 def get_wlan_data():
-#Get WLAN Template Settings and create Array
+    #Get WLAN Template Settings and create Array
 
     global api_count
     global Site_Array
@@ -172,7 +172,8 @@ def get_wlan_data():
     data2 = json.loads(resp2.text)
     for wlan in data2:
         wlan_data = format_data(wlan)
-        WLAN_Array.append(wlan_data)   
+        WLAN_Array.append(wlan_data)
+        print (".")   
 
 
 def main():
