@@ -4,6 +4,7 @@
 <p dir="auto"><code>pip install websockets </code></p>
 <p dir="auto"><code>pip install python-dotenv</code></p>
 <p dir="auto"><code>pip install pandas</code></p>
+<p dir="auto"><code>pip install openpyxl</code></p>
 <h3 dir="auto">You will also need to create a file to store your specific variables</h3>
 <p dir="auto">Example .env file:</p>
 <p dir="auto"><code>API_TOKEN="Add your API Token"</code></p>
