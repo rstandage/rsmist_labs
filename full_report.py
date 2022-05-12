@@ -219,7 +219,7 @@ def format_org_report():
         for r in a.get('privileges'):
                 role = r.get('role')
         adminname = ("{} {} - {}".format(a.get('first_name'), a.get('last_name'), role))
-        if adminid == '7b0b9300-6b07-4c69-bc75-accbc4433ab1' or adminid == '912a8ea6-5c90-4b8b-868b-923ed0f1880b':
+        if adminid == '' or adminid == '': #Add permitted Users
                 userpermitted = 'Yes'
                 permitted_users.append(adminname)
         else:
