@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+
+'''
+
+This script uses a csv file to get locations and create sites on a mist org
+
+Pre-Reqs:
+ - A Position Stack API key - https://positionstack.com/documentation
+ - A CSV file with 4 columns: Site Name, Site Address, RF Template ID, Site Groups
+ - A CSV file with long and short country codes on it: https://github.com/rstandage/rsmist_labs/blob/412b32496aac7551b248caf789bc122fdd212278/country_code_conversion.csv
+'''
+
+import json, requests
+import pandas as pd
+import time
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+mist_api_token = os.getenv("API_TOKEN")
+org_id = os.getenv("ORG_ID")
+ps_api_token = os.getenv("POSITIONSTACK")
+
+# Create URLs
+base_url = os.getenv("BASE_URL")
+positionstack_url = "http://api.positionstack.com/v1/forward"
+org_sites_url = "{}/orgs/{}/sites".format(base_url, org_id)
+org_sitegroups_url = '{}/orgs/{}/sitegroups'.format(base_url, org_id)
+
+# define standard headers
+mist_headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Token {}'.format(mist_api_token)
+    }
+
+#Create Global Variables
+mist_api_count = 0
+ps_api_count = 0
+csvfile = 'path/to/csvfile.csv'
+conversionfile = "/path/to/country_code_conversion.csv"
+sitegroupdict = {}
+Site_Array = []
+
+debug = 0
+
+############################################################
+def convert_to_JSON(x):
+# Convert CSV to JSON
+	df = pd.read_csv(x)
+	result = df.to_json(orient="records")
+	parsed = json.loads(result)
+	return parsed
+
+def convert_country_code(x, y):
+# Converts country code to two characters | x = country code, y = json of conversion table
+	for i in y:
+		if x == i['Long']:
+			code = i['Short']
+	return code
+
+def convert_sitegroups(x, y):
+#Converts group names to a list of IDs 
+	namelist = []
+	if x is None:
+		namelist = ['None']
+	else:
+		for i in x:
+			for gid, gname in y.items():
+				if i == gname:
+					namelist.append(gid)
+	return namelist
+
+def get_sitegroups():
+  global sitegroupdict
+  global mist_api_count
+  resp0 = requests.get(org_sitegroups_url, headers=mist_headers)       
+  mist_api_count = mist_api_count+1
+  data0 = json.loads(resp0.text)
+  for i in data0:
+    sitegroupdict[i['id']] = i['name']   
+
+def get_locations(x):
+# Get locations from positionstack.com
+	global ps_api_count
+	cctable = convert_to_JSON(conversionfile)
+	params={
+		'access_key': ps_api_token,
+		'query': x,
+		'timezone_module': 1,
+		'limit': 1
+		}
+	resp = requests.get(positionstack_url, params=params)
+	respdata = json.loads(resp.text)
+	ps_api_count = ps_api_count+1
+	if not respdata['data']:
+		print("Search failed for {}".format(x))
+		lat = 'null'
+		lng = 'null'
+		countrycode = 'null'
+		timezone = 'null'
+	else:		
+		for i in respdata['data']:
+			lat = i.get('latitude')
+			lng = i.get('longitude')
+			countrycode = convert_country_code(i.get('country_code'), cctable)
+			timezone = i.get('timezone_module', {}).get('name')
+	locationdata = {
+    "latlng": {
+        "lat": lat,
+        "lng": lng
+    },
+	"country_code": countrycode,
+	"timezone": timezone
+	}
+	return locationdata
+
+def create_site_config():
+#Gets Data, creates an Array with all site data and tidies up naming convention
+	global Site_Array
+	inputdata = convert_to_JSON(csvfile)
+	count = 0
+	print ("Creating Site Data.....")
+	for site in inputdata:
+		site_data = {}
+		address = site.get('Site Address')
+		loc = get_locations(address)
+		site['name'] = site.pop('Site Name')
+		site['address'] = site.pop('Site Address')
+		site['rftemplate_id'] = site.pop('RF Template ID')
+		sitegroupname = site.get('Site Groups')
+		site.pop('Site Groups')
+		site['sitegroup_ids'] = convert_sitegroups(sitegroupname.split(), sitegroupdict)
+		site['alarmtemplate_id'] = 'null'
+		site_data.update(site)
+		site_data.update(loc)
+		Site_Array.append(site_data)
+		count = count+1
+		print(count)
+		time.sleep(1)
+	return Site_Array
+
+def send_to_mist(x):
+#Sends site to mist to create sites
+	global mist_api_count
+	payload = json.dumps(x)
+	send = requests.request("POST", org_sites_url, data=payload, headers=mist_headers)
+	mist_api_count = mist_api_count+1
+	print(send)
+
+############################################################
+
+def main():
+	global mist_api_count
+	global Site_Array
+	global ps_api_count
+
+	try:
+		start_time = time.time()
+		get_sitegroups()
+		create_site_config()
+		for site in Site_Array:
+			print ("Creating {}".format(site['name']))
+			send_to_mist(site)
+		run_time = time.time() - start_time
+		print(f"\nTime to run: {round(run_time, 2)} sec")
+		print(f"\nPS API count: ", ps_api_count)
+		print(f"\nMist API count: ", mist_api_count)
+	except KeyboardInterrupt:
+		print("Cancelled By User")  
+
+if __name__ == '__main__':
+# Ensure variables are defined
+	if mist_api_token == '' or org_id == '' or ps_api_token == '' or base_url == '':
+		print('Check for Missing variables:')
+		print('mist_api_token={}'.format(mist_api_token))
+		print('ps_api_token={}'.format(ps_api_token))
+		print('org_id={}'.format(org_id))
+		print('base_url={}'.format(base_url))
+	else:  
+		main() 
