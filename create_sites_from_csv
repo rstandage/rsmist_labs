@@ -105,14 +105,14 @@ def get_locations(x):
 			lng = i.get('longitude')
 			countrycode = convert_country_code(i.get('country_code'), cctable)
 			timezone = i.get('timezone_module', {}).get('name')
-	locationdata = {
-    "latlng": {
-        "lat": lat,
-        "lng": lng
-    },
-	"country_code": countrycode,
-	"timezone": timezone
-	}
+	locationdata = {		
+		"latlng": {
+        		"lat": lat,
+        		"lng": lng
+    			},
+		"country_code": countrycode,
+		"timezone": timezone
+		}
 	return locationdata
 
 def create_site_config():
