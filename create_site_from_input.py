@@ -56,13 +56,11 @@ def get_user_input():
     input6 = input("Enter Subnet 2 (e.g 10.172.2.0/23): ")
     input7 = input("Enter Subnet 3 (e.g 10.172.4.0/23): ")
     input("\nHit Return to Begin, crtl^c to cancel at any time  ")
-    return input1, input2, input3, input4, input5, input6, input7
-
-def check_user_variables(sitename,siteid,siteaddr,sitegroups,sitenet1,sitenet2,sitenet3):
-    variables = [sitename,siteid,siteaddr,sitegroups,sitenet1,sitenet2,sitenet3]
-    for var in variables:
+    varlist = [input1, input2, input3, input4, input5, input6, input7]
+    for var in varlist:
         if var == "":
             raise ValueError(f"\n Input is missing from user variables.")
+    return input1, input2, input3, input4, input5, input6, input7
 
 def POST_to_mist(x, y):
 #Sends data to mist where x is the url and y is the payload as a dict or array
@@ -211,7 +209,8 @@ def create_subnets(x, y):
         count = count+1
         data = {
         "Seq": count,
-        "Network": str(n),
+        "Network": str(n[0]),
+        "CIDR": str(y),
         "First Host": str(n[1]),
         "Last Host": str(n[-2]),
         "Broadcast": str(n[-1])
@@ -257,7 +256,6 @@ def main():
     global google_api_count
     try:
         sitename,siteid,siteaddr,sitegroups,sitenet1,sitenet2,sitenet3 = get_user_input()
-        check_user_variables(sitename,siteid,siteaddr,sitegroups,sitenet1,sitenet2,sitenet3)
         start_time = time.time()
         #Create Site Groups
         get_sitegroups()
