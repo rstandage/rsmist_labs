@@ -122,7 +122,7 @@ def format_data(Data_Array, Site_Array):
         '2.4Ghz Channel':ap.get('band_24_channel'),
         '5Ghz Power':ap.get('band_5_power'),
         '5Ghz Bandwidth':ap.get('band_5_bandwith'),
-        '5Ghz Channel':ap.get('band_5_channel'),
+        '5Ghz Channel':ap.get('band_5_channel')
         }
         New_Array.append(data)
     return New_Array
