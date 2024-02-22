@@ -4,6 +4,8 @@
 
 This script gets information on all APs within an org and provides a .csv file
 
+***Turn off the get_config by setting to zero if AP count is above 5k or you dont want to see SSIDs/BSSIDs***
+
 '''
 
 import json, requests, time, os
