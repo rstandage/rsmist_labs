@@ -11,19 +11,20 @@ from dotenv import load_dotenv
 from datetime import date, datetime
 import pandas as pd
 
-load_dotenv()
+load_dotenv("/Users/rstandage/local/scripts/Kingfisher_Prod.env")
 
-api_token = os.getenv("API_TOKEN")
-org_id = os.getenv("ORG_ID")
+api_token = os.getenv("API_TOKEN") #change ito a string if needed
+org_id = os.getenv("ORG_ID") #change ito a string if needed
+limit = 1000 #Modify the amount of items that are pulled back at a time
+output_location = "/Users/rstandage/local/scripts/" #Set location for reports to be stored
 
 # Create URLs
-base_url = os.getenv("BASE_URL")
-org_aps_url = '{}/orgs/{}/devices/search?limit=1000'.format(base_url, org_id)
+base_url = os.getenv("BASE_URL") #change ito a string if needed
+org_aps_url = '{}/orgs/{}/devices/search?limit={}'.format(base_url, org_id, limit)
 org_sites_url = '{}/orgs/{}/sites'.format(base_url, org_id)
 
 
-#Set location for reports to be stored
-output_location = "~/"
+
 
 # define standard headers
 mist_headers = {
@@ -34,6 +35,7 @@ mist_headers = {
 mist_api_count = 0
 count = 0
 Data_Array = []
+get_config = 1 #this will also collect the BSSIDs from the APs
 
 ############################################################
 
@@ -100,15 +102,34 @@ def get_next_results(nexturl):
         print("next url was: {}".format(nexturl))
         return None 
 
+def get_ap_config(siteid, mac):
+    #uses the mac address to get BSSIDs (increases API count to 1 per AP)
+    global mist_api_count
+    url = '{}/sites/{}/devices/last_config/search?ap={}'.format(base_url, siteid, mac)
+    resp = requests.get(url, headers=mist_headers)
+    mist_api_count = mist_api_count+1
+    data = json.loads(resp.text)
+    results = data.get('results')
+    for i in results:
+        bssid_list = i.get('radio_macs')
+        ssid_list = i.get('ssids')
+    return bssid_list, ssid_list
+
 def format_data(Data_Array, Site_Array):
     New_Array = []
     for ap in Data_Array:
         site_id = ap.get('site_id')
         site_name, site_cc = find_site_details(site_id, Site_Array)
+        mac = ap.get('mac')
+        if get_config == 1:
+            bssid_list, ssid_list = get_ap_config(site_id, mac)
+        else:
+            bssid_list = []
+            ssid_list = []
         data = {
         'Name':ap.get('last_hostname'),
         'Site':site_name,
-        'MAC':ap.get('mac'),
+        'MAC':mac,
         'IP':ap.get('ip'),
         'Country Code': site_cc,
         'Type':ap.get('sku'),
@@ -117,12 +138,14 @@ def format_data(Data_Array, Site_Array):
         'LLDP System Name':ap.get('lldp_system_name'),
         'LLDP Port':ap.get('lldp_port_id'),
         'LLDP System Description':ap.get('lldp_system_desc'),
+        'SSIDS':ssid_list,
+        'BSSIDs':bssid_list,
         '2.4Ghz Power':ap.get('band_24_power'),
         '2.4Ghz Bandwidth':ap.get('band_24_bandwith'),
         '2.4Ghz Channel':ap.get('band_24_channel'),
         '5Ghz Power':ap.get('band_5_power'),
         '5Ghz Bandwidth':ap.get('band_5_bandwith'),
-        '5Ghz Channel':ap.get('band_5_channel')
+        '5Ghz Channel':ap.get('band_5_channel'),
         }
         New_Array.append(data)
     return New_Array
