@@ -13,12 +13,12 @@ from dotenv import load_dotenv
 from datetime import date, datetime
 import pandas as pd
 
-load_dotenv("/Users/rstandage/local/scripts/Kingfisher_Prod.env")
+load_dotenv()
 
 api_token = os.getenv("API_TOKEN") #change ito a string if needed
 org_id = os.getenv("ORG_ID") #change ito a string if needed
 limit = 1000 #Modify the amount of items that are pulled back at a time
-output_location = "/Users/rstandage/local/scripts/" #Set location for reports to be stored
+output_location = "" #Set location for reports to be stored
 
 # Create URLs
 base_url = os.getenv("BASE_URL") #change ito a string if needed
