@@ -38,6 +38,7 @@ mist_api_count = 0
 count = 0
 Data_Array = []
 get_config = 1 #this will also collect the BSSIDs from the APs
+#Need to make change to enable this to scale. Pull back all APs and create an Array rather than one at a time
 
 ############################################################
 
