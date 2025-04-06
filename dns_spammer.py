@@ -4,9 +4,18 @@ import dns.resolver
 import time
 from prettytable import PrettyTable
 import datetime
+import os
+import platform
 
-custom_dns_server = '8.8.8.8' # set name server 'None' for system defaults
-interval = 1  # set test intervals
+custom_dns_server = '208.67.222.222'  # set name server 'None' for system defaults
+interval = 0.1  # set test intervals
+
+def clear_screen():
+    """Clear the screen in a cross-platform way"""
+    if platform.system().lower() == "windows":
+        os.system('cls')
+    else:
+        os.system('clear')
 
 def resolve_domain(domain, table, row_index, success_counts, total_counts, response_times, custom_nameserver=None):
     """Resolves a single domain and updates the table."""
@@ -19,12 +28,12 @@ def resolve_domain(domain, table, row_index, success_counts, total_counts, respo
             nameserver = resolver.nameservers[0]
 
         start_time = time.time()
-        answers = resolver.resolve(domain)
+        # Use query() instead of resolve() for compatibility
+        answers = resolver.query(domain)  # Changed from resolve() to query()
         end_time = time.time()
-        response_time = (end_time - start_time) * 1000 #milliseconds.
-
+        response_time = (end_time - start_time) * 1000  # milliseconds
         table.rows[row_index][table.field_names.index("Status")] = "Pass"
-        table.rows[row_index][table.field_names.index("Last Success")] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        table.rows[row_index][table.field_names.index("Last Success")] = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         record_str = ", ".join(str(rdata) for rdata in answers)
         table.rows[row_index][table.field_names.index("Records")] = record_str
         table.rows[row_index][table.field_names.index("DNS Server")] = nameserver
@@ -44,12 +53,29 @@ def resolve_domain(domain, table, row_index, success_counts, total_counts, respo
     except dns.resolver.NoNameservers:
         table.rows[row_index][table.field_names.index("Status")] = "Fail (No Response)"
         table.rows[row_index][table.field_names.index("Records")] = "No Response"
+    except AttributeError:
+        # If query() is not available, try resolve()
+        try:
+            start_time = time.time()
+            answers = resolver.resolve(domain)
+            end_time = time.time()
+            response_time = (end_time - start_time) * 1000  # milliseconds
+            table.rows[row_index][table.field_names.index("Status")] = "Pass"
+            table.rows[row_index][table.field_names.index("Last Success")] = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            record_str = ", ".join(str(rdata) for rdata in answers)
+            table.rows[row_index][table.field_names.index("Records")] = record_str
+            table.rows[row_index][table.field_names.index("DNS Server")] = nameserver
+
+            success_counts[domain] = success_counts.get(domain, 0) + 1
+            response_times[domain].append(response_time)
+        except Exception as e:
+            table.rows[row_index][table.field_names.index("Status")] = f"Fail (Error: {e})"
+            table.rows[row_index][table.field_names.index("Records")] = f"Error: {e}"
     except Exception as e:
         table.rows[row_index][table.field_names.index("Status")] = f"Fail (Error: {e})"
         table.rows[row_index][table.field_names.index("Records")] = f"Error: {e}"
 
 def resolve_domains_continuously(domains, custom_nameserver=None):
-    """Resolves a list of domains every second and updates a table."""
     table = PrettyTable()
     table.field_names = ["Domain", "Status", "Last Success", "Records", "DNS Server", "Success %", "Avg Resp (ms)"]
     for domain in domains:
@@ -61,25 +87,25 @@ def resolve_domains_continuously(domains, custom_nameserver=None):
     try:
         attempt_count = 0
         while True:
-            attempt_count +=1
+            attempt_count += 1
             for i, domain in enumerate(domains):
                 total_counts[domain] = total_counts.get(domain, 0) + 1
                 resolve_domain(domain, table, i, success_counts, total_counts, response_times, custom_nameserver)
 
                 if total_counts[domain] > 0:
-                  percentage = (success_counts.get(domain, 0) / total_counts[domain]) * 100
-                  table.rows[i][table.field_names.index("Success %")] = f"{percentage:.2f}%"
+                    percentage = (success_counts.get(domain, 0) / total_counts[domain]) * 100
+                    table.rows[i][table.field_names.index("Success %")] = f"{percentage:.2f}%"
 
-                  if success_counts.get(domain, 0) > 0:
-                      avg_resp = sum(response_times[domain])/len(response_times[domain])
-                      table.rows[i][table.field_names.index("Avg Resp (ms)")] = f"{avg_resp:.2f}"
+                    if success_counts.get(domain, 0) > 0:
+                        avg_resp = sum(response_times[domain])/len(response_times[domain])
+                        table.rows[i][table.field_names.index("Avg Resp (ms)")] = f"{avg_resp:.2f}"
 
+            clear_screen()
             print(table)
             print("Press Ctrl+C to stop")
             time.sleep(interval)
-            print("\033[H\033[J", end="")
     except KeyboardInterrupt:
-        #print(table)
+        print(table)
         print("Total attempts = {}".format(attempt_count))
 
 if __name__ == "__main__":
@@ -88,6 +114,7 @@ if __name__ == "__main__":
         "www.msftconnecttest.com",
         "invalid-domain-test.com",
         "ipv6.msftconnecttest.com",
+        "mail.google.com",
         "office.microsoft.com"
     ]
 
