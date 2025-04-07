@@ -10,7 +10,7 @@ limit = 1000 #Modify the amount of items that are pulled back at a time
 base_url = 'https://api.eu.mist.com/'
 site_id = ''
 event_name = 'MARVIS_DNS_FAILURE'
-ws_ce_url = 'api/v1/sites/{}/clients/events/search?type={}&limit={}&duration=1d'.format(
+ws_ce_url = '{}api/v1/sites/{}/clients/events/search?type={}&limit={}&duration=1d'.format(
     base_url, site_id, event_name, limit )
 
 # define standard headers
